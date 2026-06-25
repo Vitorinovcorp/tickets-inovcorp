@@ -15,26 +15,13 @@ use App\Models\Estado;
 use App\Models\TipoTicket;
 use App\Models\Entidade;
 
-// =============================================
-// ROTAS PÚBLICAS
-// =============================================
-
-// Página inicial
 Route::get('/', function () {
     return view('welcome');
 });
 
-// =============================================
-// ROTA DE LOGIN UNIFICADO
-// =============================================
-
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.unificado.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-// =============================================
-// ROTAS DE TESTE
-// =============================================
 
 Route::get('/teste-tickets', function() {
     $tickets = Ticket::with(['estado', 'inbox', 'entidade', 'tipo'])->get();
@@ -50,20 +37,12 @@ Route::get('/teste-tickets', function() {
     ]);
 });
 
-// =============================================
-// ROTAS DO ADMIN (Operadores)
-// =============================================
-
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('tickets', TicketController::class);
     Route::resource('entidades', EntidadeController::class);
     Route::resource('contactos', ContactoController::class);
 });
-
-// =============================================
-// ROTAS DO CLIENTE
-// =============================================
 
 Route::prefix('cliente')->name('cliente.')->group(function () {
     // Registro (público)
@@ -77,17 +56,3 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
         Route::post('tickets/{ticket}/responder', [ClienteTicketController::class, 'responder'])->name('tickets.responder');
     });
 });
-
-// =============================================
-// ROTAS DO BREEZE (REMOVER - já temos login próprio)
-// =============================================
-
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth'])->name('dashboard');
-
-// Route::get('/profile', function () {
-//     return view('profile');
-// })->middleware(['auth'])->name('profile.edit');
-
-// require __DIR__.'/auth.php';  // COMENTADO

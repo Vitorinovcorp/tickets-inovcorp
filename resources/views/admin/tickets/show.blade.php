@@ -25,8 +25,8 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">{{ $ticket->assunto }}</h5>
-                        <span class="badge" style="background-color: {{ $ticket->estado->cor }}">
-                            {{ $ticket->estado->nome }}
+                        <span class="badge" style="background-color: {{ $ticket->estado->cor ?? '#gray' }}; color: white;">
+                            {{ $ticket->estado->nome ?? 'Sem estado' }}
                         </span>
                     </div>
                 </div>
@@ -34,22 +34,22 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <small class="text-muted">Departamento:</small>
-                            <br><strong>{{ $ticket->inbox->nome }}</strong>
+                            <br><strong>{{ $ticket->inbox->nome ?? 'N/A' }}</strong>
                         </div>
                         <div class="col-md-6">
                             <small class="text-muted">Tipo:</small>
-                            <br><strong>{{ $ticket->tipo->nome }}</strong>
+                            <br><strong>{{ $ticket->tipo->nome ?? 'N/A' }}</strong>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <small class="text-muted">Entidade:</small>
-                            <br><strong>{{ $ticket->entidade->nome }}</strong>
+                            <br><strong>{{ $ticket->entidade->nome ?? 'N/A' }}</strong>
                         </div>
                         <div class="col-md-6">
                             <small class="text-muted">Criado por:</small>
-                            <br><strong>{{ $ticket->contacto->nome }}</strong>
-                            <br><small>{{ $ticket->contacto->email }}</small>
+                            <br><strong>{{ $ticket->contacto->nome ?? 'N/A' }}</strong>
+                            <br><small>{{ $ticket->contacto->email ?? '' }}</small>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -93,7 +93,7 @@
                     @forelse($ticket->respostas as $resposta)
                         <div class="mb-3 p-3 border rounded">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <strong>{{ $resposta->nome_responsavel }}</strong>
+                                <strong>{{ $resposta->nome_responsavel ?? 'Sistema' }}</strong>
                                 <small class="text-muted">{{ $resposta->created_at->format('d/m/Y H:i') }}</small>
                             </div>
                             <div>
@@ -118,11 +118,7 @@
                         <div class="mb-3">
                             <label for="mensagem" class="form-label">Adicionar Resposta</label>
                             <textarea name="mensagem" id="mensagem" 
-                                      class="form-control @error('mensagem') is-invalid @enderror" 
-                                      rows="5" required></textarea>
-                            @error('mensagem')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                      class="form-control" rows="5" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-reply"></i> Responder
@@ -148,9 +144,6 @@
                             <div>
                                 <strong>{{ ucfirst($atividade->acao) }}</strong>
                             </div>
-                            @if($atividade->dados_novos && isset($atividade->dados_novos['estado_id']))
-                                <small class="text-muted">Estado alterado</small>
-                            @endif
                             <hr>
                         </div>
                     @empty

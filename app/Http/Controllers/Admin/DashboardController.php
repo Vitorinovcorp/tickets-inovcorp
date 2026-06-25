@@ -16,6 +16,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // ==========================================
+        // CARDS PRINCIPAIS
+        // ==========================================
+        
         $totalTickets = Ticket::count();
         $totalEntidades = Entidade::count();
         $totalContactos = Contacto::count();
@@ -31,6 +35,10 @@ class DashboardController extends Controller
         $ticketsFechados = $estadoFechado ? Ticket::where('estado_id', $estadoFechado->id)->count() : 0;
         
         $percentualConclusao = $totalTickets > 0 ? round(($ticketsFechados / $totalTickets) * 100) : 0;
+        
+        // ==========================================
+        // GRÁFICO DE TICKETS POR MÊS
+        // ==========================================
         
         $ticketsPorMes = Ticket::select(
                 DB::raw('YEAR(created_at) as ano'),
@@ -50,10 +58,18 @@ class DashboardController extends Controller
                 ];
             });
         
+        // ==========================================
+        // TICKETS POR DEPARTAMENTO
+        // ==========================================
+        
         $ticketsPorInbox = Inbox::withCount('tickets')
             ->having('tickets_count', '>', 0)
             ->orderBy('tickets_count', 'desc')
             ->get();
+        
+        // ==========================================
+        // TICKETS POR TIPO
+        // ==========================================
         
         $ticketsPorTipo = DB::table('tipos_ticket')
             ->leftJoin('tickets', 'tipos_ticket.id', '=', 'tickets.tipo_id')
@@ -63,10 +79,18 @@ class DashboardController extends Controller
             ->orderBy('tickets_count', 'desc')
             ->get();
         
+        // ==========================================
+        // ÚLTIMOS TICKETS
+        // ==========================================
+        
         $ultimosTickets = Ticket::with(['entidade', 'estado', 'inbox', 'tipo', 'contacto'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
+        
+        // ==========================================
+        // TICKETS POR DIA
+        // ==========================================
         
         $ticketsPorDia = Ticket::select(
                 DB::raw('DATE(created_at) as data'),
@@ -83,6 +107,7 @@ class DashboardController extends Controller
                 ];
             });
         
+        // Compartilhar totalTickets com a view
         view()->share('totalTickets', $totalTickets);
         
         return view('admin.dashboard', compact(
