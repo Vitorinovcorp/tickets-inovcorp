@@ -4,16 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class Contacto extends Authenticatable
 {
+    use Notifiable;
+
     protected $table = 'contactos';
+    protected $guard = 'contacto';
+    
     protected $fillable = [
-        'nome', 'funcao_id', 'email', 'telefone', 
-        'telemovel', 'notas_internas'
+        'nome', 
+        'funcao_id', 
+        'email', 
+        'password',
+        'telefone', 
+        'telemovel', 
+        'notas_internas'
     ];
     
-    protected $guard = 'contacto';
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
     
     public function funcao()
     {
@@ -22,7 +35,7 @@ class Contacto extends Authenticatable
     
     public function entidades()
     {
-        return $this->belongsToMany(Entidade::class, 'entidade_contacto');
+        return $this->belongsToMany(Entidade::class, 'entidade_contacto', 'contacto_id', 'entidade_id');
     }
     
     public function tickets()

@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Cliente;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
-use App\Models\Entidade;
+use App\Models\Resposta;
 use App\Models\Inbox;
 use App\Models\Estado;
 use App\Models\TipoTicket;
-use App\Models\Resposta;
 use App\Models\TicketConhecimento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,47 +15,21 @@ use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
-    public function dashboard()
-    {
-        $contacto = Auth::guard('contacto')->user();
-        $entidades = $contacto->entidades()->pluck('id');
-        
-        $totalTickets = Ticket::whereIn('entidade_id', $entidades)->count();
-        $abertos = Ticket::whereIn('entidade_id', $entidades)
-                         ->where('estado_id', 1)->count();
-        $emTratamento = Ticket::whereIn('entidade_id', $entidades)
-                              ->where('estado_id', 2)->count();
-        $fechados = Ticket::whereIn('entidade_id', $entidades)
-                          ->where('estado_id', 3)->count();
-        
-        $tickets = Ticket::with(['inbox', 'estado', 'tipo'])
-                         ->whereIn('entidade_id', $entidades)
-                         ->latest()
-                         ->take(10)
-                         ->get();
-        
-        return view('cliente.dashboard', compact(
-            'totalTickets', 'abertos', 'emTratamento', 
-            'fechados', 'tickets', 'entidades'
-        ));
-    }
-    
     public function index(Request $request)
     {
         $contacto = Auth::guard('contacto')->user();
         $entidades = $contacto->entidades()->pluck('id');
-        
-        $query = Ticket::with(['inbox', 'estado', 'tipo', 'entidade'])
-                       ->whereIn('entidade_id', $entidades);
-        
+
+        $query = Ticket::with(['estado', 'inbox', 'tipo', 'entidade'])
+            ->whereIn('entidade_id', $entidades);
+
+        // Filtros
         if ($request->estado_id) {
             $query->where('estado_id', $request->estado_id);
         }
-        
         if ($request->inbox_id) {
             $query->where('inbox_id', $request->inbox_id);
         }
-        
         if ($request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -64,17 +37,17 @@ class TicketController extends Controller
                   ->orWhere('assunto', 'LIKE', "%{$search}%");
             });
         }
-        
-        $tickets = $query->latest()->paginate(20);
-        
+
+        $tickets = $query->orderBy('created_at', 'desc')->paginate(20);
+
         $filtros = [
             'inboxes' => Inbox::all(),
             'estados' => Estado::all(),
         ];
-        
+
         return view('cliente.tickets.index', compact('tickets', 'filtros'));
     }
-    
+
     public function create()
     {
         $contacto = Auth::guard('contacto')->user();
@@ -82,12 +55,12 @@ class TicketController extends Controller
         $inboxes = Inbox::all();
         $tipos = TipoTicket::all();
         $estados = Estado::all();
-        
+
         return view('cliente.tickets.create', compact(
             'entidades', 'inboxes', 'tipos', 'estados'
         ));
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -99,11 +72,11 @@ class TicketController extends Controller
             'conhecimento' => 'nullable|array',
             'conhecimento.*' => 'email',
         ]);
-        
+
         DB::beginTransaction();
         try {
             $contacto = Auth::guard('contacto')->user();
-            
+
             // Criar ticket
             $ticket = Ticket::create([
                 'assunto' => $request->assunto,
@@ -114,8 +87,8 @@ class TicketController extends Controller
                 'contacto_criador_id' => $contacto->id,
                 'inbox_id' => $request->inbox_id,
             ]);
-            
-            // Salvar conhecimentos
+
+            // Salvar conhecimentos (CC)
             if ($request->conhecimento) {
                 foreach ($request->conhecimento as $email) {
                     TicketConhecimento::create([
@@ -124,41 +97,41 @@ class TicketController extends Controller
                     ]);
                 }
             }
-            
+
             DB::commit();
-            
+
             return redirect()->route('cliente.tickets.show', $ticket)
                 ->with('success', "Ticket {$ticket->numero_ticket} criado com sucesso!");
-                
+
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Erro ao criar ticket: ' . $e->getMessage());
         }
     }
-    
+
     public function show(Ticket $ticket)
     {
         $contacto = Auth::guard('contacto')->user();
-        
-        // Verificar se o ticket pertence ao cliente
         $entidades = $contacto->entidades()->pluck('id');
+
+        // Verificar se o ticket pertence ao cliente
         if (!$entidades->contains($ticket->entidade_id)) {
             abort(403, 'Você não tem permissão para visualizar este ticket.');
         }
-        
-        $ticket->load(['respostas', 'conhecimentos', 'inbox', 'estado', 'tipo']);
-        
+
+        $ticket->load(['respostas.user', 'respostas.contacto', 'conhecimentos', 'estado', 'inbox', 'tipo']);
+
         return view('cliente.tickets.show', compact('ticket'));
     }
-    
+
     public function responder(Request $request, Ticket $ticket)
     {
         $request->validate([
             'mensagem' => 'required',
         ]);
-        
+
         $contacto = Auth::guard('contacto')->user();
-        
+
         DB::beginTransaction();
         try {
             $resposta = Resposta::create([
@@ -166,11 +139,11 @@ class TicketController extends Controller
                 'contacto_id' => $contacto->id,
                 'mensagem' => $request->mensagem,
             ]);
-            
+
             DB::commit();
-            
+
             return back()->with('success', 'Resposta enviada com sucesso!');
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Erro ao enviar resposta: ' . $e->getMessage());

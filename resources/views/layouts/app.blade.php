@@ -16,7 +16,6 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
     <style>
         * {
             font-family: 'Inter', sans-serif;
@@ -26,9 +25,6 @@
             min-height: 100vh;
         }
         
-        /* ==========================================
-           NAVBAR PERSONALIZADA
-        ========================================== */
         .navbar-custom {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
@@ -129,29 +125,17 @@
             filter: invert(1);
         }
 
-        /* ==========================================
-           CONTEÚDO PRINCIPAL
-        ========================================== */
         .main-content {
             padding: 30px 20px;
         }
 
-        /* ==========================================
-           NOTIFICAÇÕES (Flash Messages)
-        ========================================== */
         .alert-flash {
             border-radius: 12px;
             border: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             padding: 15px 20px;
         }
-        .alert-flash .btn-close {
-            font-size: 0.7rem;
-        }
 
-        /* ==========================================
-           RESPONSIVIDADE
-        ========================================== */
         @media (max-width: 991px) {
             .navbar-custom .navbar-collapse {
                 background: rgba(0,0,0,0.3);
@@ -175,7 +159,7 @@
 <body>
     
     <!-- ==========================================
-    NAVBAR
+    NAVBAR ADMIN
     ========================================== -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
@@ -183,12 +167,12 @@
                 <i class="fas fa-ticket-alt"></i>
                 Tickets Inovcorp
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <!-- Menu Admin (visível apenas para usuários logados) -->
+                <!-- Menu Admin -->
                 @auth
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -218,25 +202,20 @@
                             <i class="fas fa-users"></i> Contactos
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-cog"></i> Configurações
-                        </a>
-                    </li>
                 </ul>
                 @endauth
                 
-                <!-- Menu do Usuário -->
+                <!-- Menu do Usuário Admin -->
                 <ul class="navbar-nav ms-auto">
                     @auth
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <span class="user-avatar">{{ substr(Auth::user()->name, 0, 1) }}</span>
                             <span class="user-name d-none d-md-inline">{{ Auth::user()->name }}</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                <a class="dropdown-item" href="#">
                                     <i class="fas fa-user-cog"></i> Perfil
                                 </a>
                             </li>
@@ -248,11 +227,11 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <a class="dropdown-item text-danger" href="#" 
+                                   onclick="event.preventDefault(); document.getElementById('logout-form-admin').submit();">
                                     <i class="fas fa-sign-out-alt"></i> Sair
                                 </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                <form id="logout-form-admin" action="{{ route('logout') }}" method="POST" class="d-none">
                                     @csrf
                                 </form>
                             </li>
@@ -262,11 +241,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('login') }}">
                             <i class="fas fa-sign-in-alt"></i> Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('register') }}">
-                            <i class="fas fa-user-plus"></i> Registar
                         </a>
                     </li>
                     @endauth
@@ -279,7 +253,6 @@
     CONTEÚDO PRINCIPAL
     ========================================== -->
     <div class="container-fluid main-content">
-        <!-- Mensagens Flash -->
         @if(session('success'))
             <div class="alert alert-success alert-flash alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
@@ -295,27 +268,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
-        
-        @if(session('warning'))
-            <div class="alert alert-warning alert-flash alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                {{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
-        <!-- Conteúdo da Página -->
         @yield('content')
     </div>
 
-    <!-- ==========================================
-    SCRIPTS
-    ========================================== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- jQuery (opcional) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     @stack('scripts')
 </body>
 </html>

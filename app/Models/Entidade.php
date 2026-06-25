@@ -8,13 +8,18 @@ class Entidade extends Model
 {
     protected $table = 'entidades';
     protected $fillable = [
-        'nif', 'nome', 'telefone', 'telemovel', 
-        'website', 'email', 'notas_internas'
+        'nif', 
+        'nome', 
+        'telefone', 
+        'telemovel', 
+        'website', 
+        'email', 
+        'notas_internas'
     ];
     
     public function contactos()
     {
-        return $this->belongsToMany(Contacto::class, 'entidade_contacto');
+        return $this->belongsToMany(Contacto::class, 'entidade_contacto', 'entidade_id', 'contacto_id');
     }
     
     public function tickets()
