@@ -176,6 +176,215 @@
             font-size: 2.5rem;
         }
 
+        .footer-custom {
+            background: linear-gradient(135deg, #1a2332 0%, #2c3e6b 100%);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 50px 0 0;
+            margin-top: 40px;
+            border-top: 3px solid #667eea;
+        }
+
+        .footer-custom .footer-brand {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .footer-custom .footer-logo {
+            height: 40px;
+            width: auto;
+            margin-right: 12px;
+        }
+
+        .footer-custom .footer-brand-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .footer-custom .footer-description {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 20px;
+            max-width: 350px;
+        }
+
+        .footer-custom .footer-title {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-custom .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: #667eea;
+        }
+
+        .footer-custom .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-custom .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-custom .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .footer-custom .footer-links a i {
+            font-size: 0.6rem;
+            margin-right: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .footer-custom .footer-links a:hover {
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .footer-custom .footer-links a:hover i {
+            transform: translateX(3px);
+        }
+
+        .footer-custom .footer-social {
+            display: flex;
+            gap: 10px;
+        }
+
+        .footer-custom .social-link {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .footer-custom .social-link:hover {
+            background: #667eea;
+            transform: translateY(-3px);
+            color: #fff;
+        }
+
+        .footer-custom .footer-contact {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-custom .footer-contact li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .footer-custom .footer-contact li i {
+            width: 28px;
+            font-size: 1rem;
+            color: #667eea;
+        }
+
+        .footer-custom .footer-contact li span {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-custom .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px 0;
+            margin-top: 35px;
+        }
+
+        .footer-custom .footer-bottom p {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin: 0;
+        }
+
+        .footer-custom .footer-bottom a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-custom .footer-bottom a:hover {
+            color: #667eea;
+        }
+
+        .footer-custom .footer-divider {
+            margin: 0 10px;
+            opacity: 0.3;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .footer-custom {
+                padding: 35px 0 0;
+            }
+
+            .footer-custom .footer-description {
+                max-width: 100%;
+            }
+
+            .footer-custom .footer-title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .footer-custom .footer-title {
+                text-align: center;
+            }
+
+            .footer-custom .footer-links {
+                text-align: center;
+            }
+
+            .footer-custom .footer-links a {
+                justify-content: center;
+            }
+
+            .footer-custom .footer-social {
+                justify-content: center;
+            }
+
+            .footer-custom .footer-contact li {
+                justify-content: center;
+            }
+
+            .footer-custom .footer-bottom .text-md-end {
+                text-align: center !important;
+                margin-top: 8px;
+            }
+
+            .footer-custom .footer-brand {
+                justify-content: center;
+            }
+        }
+
         @media (max-width: 991px) {
             .navbar-custom .navbar-collapse {
                 background: rgba(0, 0, 0, 0.3);
@@ -317,6 +526,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
+    @include('partials.footer')
 </body>
 
 </html>
