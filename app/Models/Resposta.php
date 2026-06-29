@@ -8,22 +8,22 @@ class Resposta extends Model
 {
     protected $table = 'respostas';
     protected $fillable = ['ticket_id', 'user_id', 'contacto_id', 'mensagem'];
-    
+
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);
     }
-    
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function contacto()
     {
         return $this->belongsTo(Contacto::class);
     }
-    
+
     public function getNomeResponsavelAttribute()
     {
         if ($this->user_id) {
@@ -33,5 +33,10 @@ class Resposta extends Model
             return $this->contacto->nome;
         }
         return 'Sistema';
+    }
+
+    public function anexos()
+    {
+        return $this->hasMany(Anexo::class);
     }
 }

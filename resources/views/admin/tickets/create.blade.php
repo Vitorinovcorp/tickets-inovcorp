@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h2> Criar Novo Ticket</h2>
+            <h2>📝 Criar Novo Ticket</h2>
         </div>
         <div class="col-md-6 text-end">
             <a href="{{ route('admin.tickets.index') }}" class="btn btn-secondary">
@@ -27,7 +27,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('admin.tickets.store') }}" method="POST">
+            <form action="{{ route('admin.tickets.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
                 <div class="row">
@@ -163,6 +163,27 @@
                               rows="8" required>{{ old('mensagem') }}</textarea>
                     @error('mensagem')
                         <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- ==========================================
+                CAMPO DE ANEXOS CORRIGIDO
+                ========================================== -->
+                <div class="mb-3">
+                    <label for="anexos" class="form-label">Anexos</label>
+                    <input type="file" name="anexos[]" id="anexos" 
+                           class="form-control @error('anexos.*') is-invalid @enderror" 
+                           multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.json,.csv">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Formatos permitidos: JPG, PNG, GIF, WEBP, PDF, DOC, DOCX, XLS, XLSX, TXT, ZIP, RAR, JSON, CSV 
+                        (Máx: 10MB por arquivo)
+                    </small>
+                    @error('anexos.*')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                    @error('anexos')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
 

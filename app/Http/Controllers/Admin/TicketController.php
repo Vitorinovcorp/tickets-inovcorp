@@ -12,11 +12,15 @@ use App\Models\TipoTicket;
 use App\Models\Resposta;
 use App\Models\TicketConhecimento;
 use App\Models\AtividadeTicket;
+use App\Models\Anexo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Mail\NovoTicketMail;
 use App\Mail\RespostaTicketMail;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class TicketController extends Controller
 {
@@ -89,11 +93,12 @@ class TicketController extends Controller
             'inbox_id' => 'required|exists:inboxes,id',
             'conhecimento' => 'nullable|array',
             'conhecimento.*' => 'email',
+            //'anexos' => 'nullable|array',
+            //'anexos.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,rar,json,csv',
         ]);
 
         DB::beginTransaction();
         try {
-            // Criar ticket
             $ticket = Ticket::create([
                 'assunto' => $request->assunto,
                 'tipo_id' => $request->tipo_id,
@@ -105,7 +110,6 @@ class TicketController extends Controller
                 'inbox_id' => $request->inbox_id,
             ]);
 
-            // Salvar conhecimentos (CC)
             if ($request->conhecimento) {
                 foreach ($request->conhecimento as $email) {
                     TicketConhecimento::create([
@@ -115,7 +119,15 @@ class TicketController extends Controller
                 }
             }
 
-            // Registrar atividade
+            // Salvar anexos
+            if ($request->hasFile('anexos')) {
+                foreach ($request->file('anexos') as $file) {
+                    if ($file->isValid()) {
+                        $this->salvarAnexo($file, $ticket->id);
+                    }
+                }
+            }
+
             AtividadeTicket::create([
                 'ticket_id' => $ticket->id,
                 'acao' => 'criado',
@@ -123,7 +135,6 @@ class TicketController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            // Enviar notificações
             $this->enviarNotificacoesNovoTicket($ticket);
 
             DB::commit();
@@ -138,7 +149,20 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        $ticket->load(['respostas.user', 'respostas.contacto', 'atividades', 'conhecimentos']);
+        $ticket->load([
+            'respostas.user',
+            'respostas.contacto',
+            'respostas.anexos',
+            'atividades',
+            'conhecimentos',
+            'anexos',
+            'entidade',
+            'inbox',
+            'tipo',
+            'contacto',
+            'operador'
+        ]);
+
         return view('admin.tickets.show', compact('ticket'));
     }
 
@@ -176,7 +200,6 @@ class TicketController extends Controller
             'inbox_id' => $request->inbox_id,
         ]);
 
-        // Registrar atividade
         AtividadeTicket::create([
             'ticket_id' => $ticket->id,
             'acao' => 'atualizado',
@@ -206,14 +229,20 @@ class TicketController extends Controller
 
         DB::beginTransaction();
         try {
-            // Criar resposta
             $resposta = Resposta::create([
                 'ticket_id' => $ticket->id,
                 'user_id' => auth()->id(),
                 'mensagem' => $request->mensagem,
             ]);
 
-            // Registrar atividade
+            // Salvar anexo da resposta se houver
+            if ($request->hasFile('anexo_resposta')) {
+                $file = $request->file('anexo_resposta');
+                if ($file->isValid()) {
+                    $this->salvarAnexo($file, $ticket->id, $resposta->id);
+                }
+            }
+
             AtividadeTicket::create([
                 'ticket_id' => $ticket->id,
                 'acao' => 'respondido',
@@ -221,7 +250,6 @@ class TicketController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            // Enviar notificações da resposta
             $this->enviarNotificacoesResposta($ticket, $resposta);
 
             DB::commit();
@@ -237,15 +265,12 @@ class TicketController extends Controller
     {
         $emails = [];
 
-        // Criador do ticket
         $emails[] = $ticket->contacto->email;
 
-        // Operador associado
         if ($ticket->operador_associado_id) {
             $emails[] = $ticket->operador->email;
         }
 
-        // Emails em conhecimento
         foreach ($ticket->conhecimentos as $conhecimento) {
             $emails[] = $conhecimento->email;
         }
@@ -256,7 +281,6 @@ class TicketController extends Controller
             try {
                 Mail::to($email)->send(new NovoTicketMail($ticket));
             } catch (\Exception $e) {
-                // Log do erro
                 \Log::error("Erro ao enviar email para {$email}: " . $e->getMessage());
             }
         }
@@ -266,20 +290,16 @@ class TicketController extends Controller
     {
         $emails = [];
 
-        // Criador do ticket
         $emails[] = $ticket->contacto->email;
 
-        // Operador associado
         if ($ticket->operador_associado_id) {
             $emails[] = $ticket->operador->email;
         }
 
-        // Emails em conhecimento
         foreach ($ticket->conhecimentos as $conhecimento) {
             $emails[] = $conhecimento->email;
         }
 
-        // Remover quem respondeu
         $emails = array_diff($emails, [auth()->user()->email]);
         $emails = array_unique($emails);
 
@@ -290,5 +310,61 @@ class TicketController extends Controller
                 \Log::error("Erro ao enviar email para {$email}: " . $e->getMessage());
             }
         }
+    }
+
+    private function salvarAnexo($file, $ticketId, $respostaId = null)
+    {
+        $extensao = $file->getClientOriginalExtension();
+        $nomeOriginal = $file->getClientOriginalName();
+        $mimeType = $file->getMimeType();
+        $tamanho = $file->getSize();
+
+        $nomeArquivo = Str::uuid() . '.' . $extensao;
+        $caminho = 'anexos/tickets/' . $ticketId . '/' . $nomeArquivo;
+
+        $file->storeAs('public/' . dirname($caminho), $nomeArquivo);
+
+        return Anexo::create([
+            'ticket_id' => $ticketId,
+            'resposta_id' => $respostaId,
+            'nome_original' => $nomeOriginal,
+            'nome_arquivo' => $nomeArquivo,
+            'caminho' => $caminho,
+            'mime_type' => $mimeType,
+            'tamanho' => $tamanho,
+            'extensao' => $extensao,
+            'uploaded_by' => auth()->id(),
+        ]);
+    }
+
+    public function export(Ticket $ticket)
+    {
+        $ticket->load([
+            'respostas.user',
+            'respostas.contacto',
+            'respostas.anexos',
+            'atividades',
+            'conhecimentos',
+            'anexos',
+            'entidade',
+            'inbox',
+            'tipo',
+            'contacto',
+            'operador'
+        ]);
+
+        // Caminho absoluto da imagem para o DomPDF
+        $logoPath = public_path('images/inovcorp-logo.png');
+
+        $pdf = Pdf::loadView('admin.tickets.pdf', compact('ticket', 'logoPath'));
+
+        $pdf->setOptions([
+            'defaultFont' => 'sans-serif',
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isPhpEnabled' => true,
+        ]);
+
+        return $pdf->download("Ticket_{$ticket->numero_ticket}.pdf");
     }
 }
