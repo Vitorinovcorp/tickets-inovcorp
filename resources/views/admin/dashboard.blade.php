@@ -505,9 +505,6 @@
                 <p>Bem-vindo ao painel de controle do Tickets Inovcorp. Acompanhe abaixo o resumo do seu sistema.</p>
             </div>
             <div class="col-md-4 text-end">
-                <span class="badge bg-light text-dark px-4 py-2">
-                    <i class="fas fa-calendar-alt me-2"></i> {{ now()->format('d/m/Y H:i') }}
-                </span>
             </div>
         </div>
     </div>

@@ -36,10 +36,17 @@
             letter-spacing: -0.5px;
             color: #fff;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
         }
         .navbar-custom .navbar-brand:hover {
             color: #667eea;
             transform: scale(1.02);
+        }
+        .navbar-custom .navbar-brand img {
+            height: 35px;
+            width: auto;
+            margin-right: 10px;
         }
         .navbar-custom .navbar-brand i {
             margin-right: 8px;
@@ -151,6 +158,9 @@
             .main-content {
                 padding: 20px 10px;
             }
+            .navbar-custom .navbar-brand img {
+                height: 28px;
+            }
         }
     </style>
 
@@ -164,7 +174,7 @@
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('admin.dashboard') }}">
-                <i class="fas fa-ticket-alt"></i>
+                <img src="{{ asset('images/inovcorp-logo.png') }}" alt="Inovcorp">
                 Tickets Inovcorp
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">

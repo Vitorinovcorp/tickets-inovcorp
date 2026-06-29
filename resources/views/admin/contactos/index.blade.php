@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h2>👤 Contactos</h2>
+            <h2> Contactos</h2>
         </div>
         <div class="col-md-6 text-end">
             <a href="{{ route('admin.contactos.create') }}" class="btn btn-primary">

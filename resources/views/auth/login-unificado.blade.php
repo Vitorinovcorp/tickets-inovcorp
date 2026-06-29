@@ -113,7 +113,6 @@
 </head>
 <body>
     <div class="login-card">
-        <div class="logo">🎫</div>
         <h2>Tickets Inovcorp</h2>
         <p class="subtitle">Faça login para continuar</p>
 
@@ -160,10 +159,10 @@
             </button>
             
             <div class="tipo-usuario">
-                <span class="admin-tag">🔑 Admin</span>
-                <span class="cliente-tag">👤 Cliente</span>
+                <span class="admin-tag"> Admin</span>
+                <span class="cliente-tag">Cliente</span>
                 <br>
-                <small>O sistema identifica automaticamente seu tipo de usuário</small>
+               
             </div>
             
             <div class="register-link">
@@ -171,11 +170,6 @@
             </div>
 
             <hr>
-            <div class="text-center">
-                <a href="{{ url('/') }}" class="text-decoration-none text-muted small">
-                    <i class="fas fa-arrow-left me-1"></i> Voltar para o site
-                </a>
-            </div>
         </form>
     </div>
 

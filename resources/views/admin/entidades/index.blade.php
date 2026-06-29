@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h2>🏢 Entidades</h2>
+            <h2> Entidades</h2>
         </div>
         <div class="col-md-6 text-end">
             <a href="{{ route('admin.entidades.create') }}" class="btn btn-primary">
